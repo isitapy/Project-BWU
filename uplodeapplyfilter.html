@@ -1,0 +1,51 @@
+<!-- To create a web page where users can upload an image and apply basic filters (grayscale, sepia) by dynamically manipulating the image's CSS properties using JavaScript selectors. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Filter Application</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 30px; background: #f9fafb; }
+    .container { max-width: 600px; margin: auto; text-align: center; }
+    input[type="file"] { margin-bottom: 20px; }
+    img { max-width: 100%; height: auto; border-radius: 10px; margin-top: 20px; transition: filter 0.3s ease; }
+    .buttons { margin-top: 20px; display: flex; justify-content: center; gap: 10px; }
+    button { padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; background: #3b82f6; color: #fff; }
+    button:hover { filter: brightness(1.2); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Upload & Apply Filters</h1>
+    <input type="file" id="upload" accept="image/*">
+    <div class="buttons">
+      <button onclick="applyFilter('none')">Normal</button>
+      <button onclick="applyFilter('grayscale(100%)')">Grayscale</button>
+      <button onclick="applyFilter('sepia(100%)')">Sepia</button>
+    </div>
+    <img id="image" src="" alt="Uploaded Preview" style="display:none;">
+  </div>
+
+  <script>
+    const upload = document.getElementById("upload");
+    const image = document.getElementById("image");
+
+    upload.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          image.src = reader.result;
+          image.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    function applyFilter(filter) {
+      image.style.filter = filter;
+    }
+  </script>
+</body>
+</html>
