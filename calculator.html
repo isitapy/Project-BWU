@@ -1,0 +1,126 @@
+<!-- To build a web-based calculator that performs basic arithmetic operations, emphasizing JavaScript's control statements, functions, arrays (for history), and robust error handling using the HTML DOM for display. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web Calculator with JS Control Flow, Functions, Arrays, Error Handling</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; display: flex; justify-content: center; padding: 40px; }
+    .calc { background: #1e293b; padding: 20px; border-radius: 16px; width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+    .display { background: #0f172a; padding: 12px; border-radius: 12px; font-size: 24px; text-align: right; overflow-x: auto; }
+    .buttons { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 16px; }
+    button { padding: 16px; border: none; border-radius: 12px; font-size: 18px; cursor: pointer; background: #334155; color: #f1f5f9; transition: filter .2s; }
+    button:hover { filter: brightness(1.2); }
+    button.op { background: #2563eb; }
+    button.eq { background: #10b981; grid-column: span 2; }
+    button.clr { background: #ef4444; }
+    .history { margin-top: 20px; background: #0f172a; border-radius: 12px; padding: 10px; font-size: 14px; max-height: 150px; overflow-y: auto; }
+    .history h3 { margin: 4px 0; font-size: 14px; color: #94a3b8; }
+    .history ul { list-style: none; margin: 0; padding: 0; }
+    .history li { padding: 4px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .error { color: #f87171; font-size: 14px; min-height: 20px; margin-top: 6px; }
+  </style>
+</head>
+<body>
+  <div class="calc">
+    <div id="display" class="display">0</div>
+    <div class="error" id="error"></div>
+    <div class="buttons">
+      <button onclick="press('7')">7</button>
+      <button onclick="press('8')">8</button>
+      <button onclick="press('9')">9</button>
+      <button class="op" onclick="press('/')">÷</button>
+
+      <button onclick="press('4')">4</button>
+      <button onclick="press('5')">5</button>
+      <button onclick="press('6')">6</button>
+      <button class="op" onclick="press('*')">×</button>
+
+      <button onclick="press('1')">1</button>
+      <button onclick="press('2')">2</button>
+      <button onclick="press('3')">3</button>
+      <button class="op" onclick="press('-')">−</button>
+
+      <button onclick="press('0')">0</button>
+      <button onclick="press('.')">.</button>
+      <button class="eq" onclick="calculate()">=</button>
+      <button class="op" onclick="press('+')">+</button>
+
+      <button class="clr" onclick="clearDisplay()">C</button>
+    </div>
+    <div class="history">
+      <h3>History</h3>
+      <ul id="history"></ul>
+    </div>
+  </div>
+
+  <script>
+    // Core calculator state
+    let expression = "";
+    const historyArr = [];
+
+    function updateDisplay(value) {
+      document.getElementById("display").textContent = value;
+    }
+
+    function showError(msg) {
+      document.getElementById("error").textContent = msg;
+      setTimeout(() => document.getElementById("error").textContent = "", 2500);
+    }
+
+    function press(char) {
+      // Control statements to prevent invalid inputs
+      if (char === '.' && expression.endsWith('.')) {
+        showError("Invalid: multiple decimals");
+        return;
+      }
+      if (["+","-","*","/"].includes(char) && expression === "") {
+        showError("Expression can't start with operator");
+        return;
+      }
+      expression += char;
+      updateDisplay(expression);
+    }
+
+    function calculate() {
+      try {
+        if (expression === "") {
+          showError("Nothing to calculate");
+          return;
+        }
+        // Error handling: detect invalid sequences
+        if (/([+\-*/]{2,})/.test(expression)) {
+          showError("Invalid operator sequence");
+          return;
+        }
+        let result = Function('return ' + expression)();
+        if (result === Infinity || isNaN(result)) {
+          throw new Error("Math error");
+        }
+        historyArr.push(expression + " = " + result);
+        renderHistory();
+        expression = String(result);
+        updateDisplay(expression);
+      } catch (err) {
+        showError(err.message);
+      }
+    }
+
+    function clearDisplay() {
+      expression = "";
+      updateDisplay("0");
+    }
+
+    function renderHistory() {
+      const list = document.getElementById("history");
+      list.innerHTML = "";
+      for (let item of historyArr.slice(-10).reverse()) {
+        const li = document.createElement("li");
+        li.textContent = item;
+        list.appendChild(li);
+      }
+    }
+  </script>
+</body>
+</html>
