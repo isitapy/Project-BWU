@@ -1,0 +1,388 @@
+<!-- To create an HTML registration form and implement client-side validation using fundamental JavaScript concepts (variable declaration, operators, control statements, functions) and HTML DOM manipulation. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registration Form • Vanilla JS Validation</title>
+  <style>
+    :root {
+      --bg: #0f172a;        /* slate-900 */
+      --card: #111827;      /* gray-900 */
+      --muted: #94a3b8;     /* slate-400 */
+      --text: #e5e7eb;      /* gray-200 */
+      --accent: #22d3ee;    /* cyan-400 */
+      --danger: #ef4444;    /* red-500 */
+      --ok: #10b981;        /* emerald-500 */
+      --ring: rgba(34, 211, 238, 0.45);
+    }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif; background: radial-gradient(1200px 800px at 20% 10%, #0b1023, var(--bg)); color: var(--text); }
+    .container { max-width: 880px; margin: 64px auto; padding: 24px; }
+    .card { background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02)); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.35); padding: 28px; }
+    h1 { font-size: 28px; margin: 0 0 6px; letter-spacing: .3px; }
+    p.sub { color: var(--muted); margin: 0 0 24px; }
+
+    form { display: grid; grid-template-columns: repeat(12, 1fr); gap: 16px; }
+    .field { grid-column: span 12; display: flex; flex-direction: column; gap: 6px; }
+    @media (min-width: 720px) {
+      .col-6 { grid-column: span 6; }
+      .col-4 { grid-column: span 4; }
+    }
+    label { font-size: 14px; color: #cbd5e1; }
+    input, select { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: #0b1222; color: var(--text); outline: none; transition: box-shadow .2s, border-color .2s, transform .05s; }
+    input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 4px var(--ring); }
+    .hint { font-size: 12px; color: var(--muted); }
+    .error { font-size: 12px; color: var(--danger); min-height: 16px; }
+    .invalid { border-color: var(--danger) !important; box-shadow: 0 0 0 4px rgba(239, 68, 68, .2) !important; }
+
+    .actions { grid-column: span 12; display: flex; gap: 12px; align-items: center; justify-content: flex-start; margin-top: 8px; }
+    button { appearance: none; border: none; border-radius: 14px; padding: 12px 18px; background: linear-gradient(90deg, #06b6d4, #22d3ee); color: #00131a; font-weight: 700; cursor: pointer; transition: transform .05s ease, filter .2s ease; }
+    button:hover { filter: brightness(1.08); }
+    button:active { transform: translateY(1px); }
+
+    .msg { display: none; grid-column: span 12; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); }
+    .msg.ok { display: block; background: rgba(16, 185, 129, 0.1); border-color: rgba(16,185,129,.35); }
+    .msg.err { display: block; background: rgba(239, 68, 68, 0.08); border-color: rgba(239,68,68,.35); }
+    .req { color: #fca5a5; margin-left: 2px; }
+
+    .inline { display: flex; align-items: center; gap: 10px; }
+    .chips { font-size: 12px; display: flex; flex-wrap: wrap; gap: 8px; color: var(--muted); }
+    .chip { padding: 4px 8px; border-radius: 999px; background: rgba(255,255,255,0.06); border: 1px dashed rgba(255,255,255,0.14); }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="card">
+      <h1>Registration</h1>
+      <p class="sub">Client-side validation using <strong>vanilla JavaScript</strong> (variables, operators, control flow, functions) and <strong>DOM</strong> manipulation.</p>
+
+      <div id="formMsg" class="msg" role="status" aria-live="polite"></div>
+
+      <form id="regForm" novalidate>
+        <!-- FULL NAME -->
+        <div class="field col-6">
+          <label for="fullName">Full Name <span class="req">*</span></label>
+          <input id="fullName" name="fullName" type="text" placeholder="e.g., Asha Kumar" />
+          <div class="error" id="err-fullName"></div>
+        </div>
+
+        <!-- EMAIL -->
+        <div class="field col-6">
+          <label for="email">Email <span class="req">*</span></label>
+          <input id="email" name="email" type="email" placeholder="e.g., asha@example.com" />
+          <div class="error" id="err-email"></div>
+        </div>
+
+        <!-- PHONE -->
+        <div class="field col-6">
+          <label for="phone">Phone <span class="req">*</span></label>
+          <input id="phone" name="phone" type="tel" placeholder="10 digits" inputmode="numeric" />
+          <div class="error" id="err-phone"></div>
+        </div>
+
+        <!-- DOB -->
+        <div class="field col-6">
+          <label for="dob">Date of Birth <span class="req">*</span></label>
+          <input id="dob" name="dob" type="date" />
+          <div class="error" id="err-dob"></div>
+        </div>
+
+        <!-- GENDER -->
+        <div class="field col-6">
+          <label>Gender</label>
+          <div class="inline" role="group" aria-labelledby="gender">
+            <label class="inline"><input type="radio" name="gender" value="female"> Female</label>
+            <label class="inline"><input type="radio" name="gender" value="male"> Male</label>
+            <label class="inline"><input type="radio" name="gender" value="other"> Other</label>
+          </div>
+          <div class="hint">Optional</div>
+        </div>
+
+        <!-- COUNTRY -->
+        <div class="field col-6">
+          <label for="country">Country <span class="req">*</span></label>
+          <select id="country" name="country">
+            <option value="">— Select —</option>
+            <option>India</option>
+            <option>United States</option>
+            <option>United Kingdom</option>
+            <option>Canada</option>
+            <option>Australia</option>
+            <option>Other</option>
+          </select>
+          <div class="error" id="err-country"></div>
+        </div>
+
+        <!-- PASSWORD -->
+        <div class="field col-6">
+          <label for="password">Password <span class="req">*</span></label>
+          <input id="password" name="password" type="password" placeholder="At least 8 chars" />
+          <div class="chips" id="pwdChips">
+            <span class="chip" data-rule="len">≥ 8 chars</span>
+            <span class="chip" data-rule="uc">Uppercase</span>
+            <span class="chip" data-rule="lc">Lowercase</span>
+            <span class="chip" data-rule="num">Number</span>
+            <span class="chip" data-rule="sp">Special (!@#$…)</span>
+          </div>
+          <div class="error" id="err-password"></div>
+        </div>
+
+        <!-- CONFIRM PASSWORD -->
+        <div class="field col-6">
+          <label for="confirm">Confirm Password <span class="req">*</span></label>
+          <input id="confirm" name="confirm" type="password" />
+          <div class="error" id="err-confirm"></div>
+        </div>
+
+        <!-- TERMS -->
+        <div class="field" style="grid-column: span 12;">
+          <label class="inline"><input type="checkbox" id="terms" /> I agree to the Terms & Privacy Policy <span class="req">*</span></label>
+          <div class="error" id="err-terms"></div>
+        </div>
+
+        <div class="actions">
+          <button type="submit">Create Account</button>
+          <button type="reset" id="resetBtn" title="Clear all fields">Reset</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ===== Fundamental JavaScript Concepts Demonstrated =====
+    // 1) Variable declarations: var, let, const
+    // 2) Operators: arithmetic (+ -), comparison (=== !== >), logical (&& || !), ternary
+    // 3) Control statements: if/else, switch, for...of/for, return
+    // 4) Functions: declarations, expressions, arrow functions
+    // 5) DOM manipulation: querySelector, classList, textContent, createElement
+
+    // --- Helpers (Functions) ---
+    function $(sel) { return document.querySelector(sel); }
+    const byId = (id) => document.getElementById(id);
+
+    // Email validation using a simple regex (sufficient for demo/teaching):
+    const isEmailValid = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+
+    // Phone: digits only, typical 10 digits (adjust to your needs)
+    function isPhoneValid(num) {
+      const digits = String(num).replace(/\D/g, "");
+      return digits.length === 10;
+    }
+
+    // Password checks
+    const rules = {
+      len: (s) => s.length >= 8,
+      uc:  (s) => /[A-Z]/.test(s),
+      lc:  (s) => /[a-z]/.test(s),
+      num: (s) => /\d/.test(s),
+      sp:  (s) => /[^\w\s]/.test(s), // any non-word, non-space as special
+    };
+
+    function strongPassword(pass) {
+      let passed = 0; // arithmetic & increment
+      for (const key in rules) { if (rules[key](pass)) passed++; }
+      return passed >= 4; // at least 4 out of 5 rules
+    }
+
+    // Calculate age from DOB to enforce a minimum age (e.g., 13)
+    function ageFromDOB(dobStr) {
+      if (!dobStr) return 0;
+      const dob = new Date(dobStr);
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) age--;
+      return age;
+    }
+
+    // Display field error and mark invalid
+    function setError(inputEl, message) {
+      const errEl = byId(`err-${inputEl.id}`);
+      inputEl.classList.add('invalid');
+      if (errEl) errEl.textContent = message || '';
+    }
+
+    // Clear field error
+    function clearError(inputEl) {
+      const errEl = byId(`err-${inputEl.id}`);
+      inputEl.classList.remove('invalid');
+      if (errEl) errEl.textContent = '';
+    }
+
+    // Show top message banner
+    function showBanner(type, text) {
+      const box = byId('formMsg');
+      box.className = 'msg ' + (type === 'ok' ? 'ok' : 'err');
+      box.textContent = text;
+    }
+
+    // Update password requirement chips (DOM manipulation)
+    function updatePwdChips(value) {
+      const chips = byId('pwdChips').querySelectorAll('.chip');
+      chips.forEach((chip) => {
+        const ruleKey = chip.getAttribute('data-rule');
+        const ok = rules[ruleKey](value);
+        chip.style.borderStyle = ok ? 'solid' : 'dashed';
+        chip.style.opacity = ok ? '1' : '.6';
+      });
+    }
+
+    // --- Main validation on submit ---
+    const form = byId('regForm');
+    const inputs = {
+      fullName: byId('fullName'),
+      email: byId('email'),
+      phone: byId('phone'),
+      dob: byId('dob'),
+      country: byId('country'),
+      password: byId('password'),
+      confirm: byId('confirm'),
+      terms: byId('terms'),
+    };
+
+    // Real-time feedback for password
+    inputs.password.addEventListener('input', (e) => {
+      const v = e.target.value;
+      updatePwdChips(v);
+      if (v.length === 0) { byId('err-password').textContent = ''; return; }
+      byId('err-password').textContent = strongPassword(v) ? '' : 'Try mixing UPPER/lower, numbers, and special characters';
+    });
+
+    // Clear errors when typing
+    for (const key in inputs) {
+      const el = inputs[key];
+      if (el && el.tagName !== 'INPUT' && el.tagName !== 'SELECT') continue;
+      el.addEventListener('input', () => clearError(el));
+      el.addEventListener('change', () => clearError(el));
+    }
+
+    form.addEventListener('submit', function (evt) {
+      evt.preventDefault(); // stop native submit
+      let valid = true; // assume valid, disprove with checks
+
+      // Trimmed values (demonstrates let/const)
+      const nameVal = inputs.fullName.value.trim();
+      const emailVal = inputs.email.value.trim();
+      const phoneVal = inputs.phone.value.trim();
+      const dobVal = inputs.dob.value;
+      const countryVal = inputs.country.value;
+      const passVal = inputs.password.value;
+      const confVal = inputs.confirm.value;
+      const termsChecked = inputs.terms.checked;
+
+      // --- Full Name validation ---
+      if (nameVal === '') {
+        setError(inputs.fullName, 'Full name is required'); valid = false;
+      } else if (!/^[A-Za-z\s'.-]{2,}$/.test(nameVal)) {
+        setError(inputs.fullName, 'Use letters/spaces only (min 2 chars)'); valid = false;
+      } else { clearError(inputs.fullName); }
+
+      // --- Email ---
+      if (emailVal === '' || !isEmailValid(emailVal)) {
+        setError(inputs.email, 'Enter a valid email address'); valid = false;
+      } else { clearError(inputs.email); }
+
+      // --- Phone ---
+      if (!isPhoneValid(phoneVal)) {
+        setError(inputs.phone, 'Enter a 10-digit phone number'); valid = false;
+      } else { clearError(inputs.phone); }
+
+      // --- DOB & Age ---
+      const age = ageFromDOB(dobVal);
+      if (!dobVal) {
+        setError(inputs.dob, 'Please select your date of birth'); valid = false;
+      } else if (age < 13) {
+        setError(inputs.dob, `Minimum age is 13 (you are ${age})`); valid = false;
+      } else { clearError(inputs.dob); }
+
+      // --- Country ---
+      if (!countryVal) { setError(inputs.country, 'Please select your country'); valid = false; }
+      else { clearError(inputs.country); }
+
+      // --- Password ---
+      if (!passVal) { setError(inputs.password, 'Password is required'); valid = false; }
+      else if (!strongPassword(passVal)) { setError(inputs.password, 'Password is too weak'); valid = false; }
+      else { clearError(inputs.password); }
+
+      // --- Confirm Password ---
+      if (confVal !== passVal) { setError(inputs.confirm, 'Passwords do not match'); valid = false; }
+      else { clearError(inputs.confirm); }
+
+      // --- Terms ---
+      if (!termsChecked) { byId('err-terms').textContent = 'You must accept the terms'; valid = false; }
+      else { byId('err-terms').textContent = ''; }
+
+      // Ternary operator to decide banner type
+      showBanner(valid ? 'ok' : 'err', valid ? '✓ Registration successful (demo only — no data sent)!' : 'Please fix the highlighted fields.');
+
+      if (valid) {
+        // Example: Create a summary below the form (DOM manipulation demo)
+        const summary = document.createElement('div');
+        summary.style.marginTop = '14px';
+        summary.style.padding = '12px 14px';
+        summary.style.border = '1px dashed rgba(255,255,255,0.2)';
+        summary.style.borderRadius = '12px';
+        const g = document.querySelector('input[name="gender"]:checked');
+        const gender = g ? g.value : '—';
+
+        // simple masking of phone for display using operators & slice
+        const maskedPhone = phoneVal.replace(/\D/g, "");
+        const safePhone = maskedPhone.length >= 10 ? ("•••••" + maskedPhone.slice(-5)) : '—';
+
+        summary.innerHTML = `
+          <div><strong>Summary</strong></div>
+          <div class="hint">(Rendered on the client for demonstration)</div>
+          <ul style="margin:10px 0 0 18px; line-height:1.6">
+            <li>Name: ${nameVal}</li>
+            <li>Email: ${emailVal}</li>
+            <li>Phone: ${safePhone}</li>
+            <li>DOB: ${dobVal} (Age: ${age})</li>
+            <li>Gender: ${gender}</li>
+            <li>Country: ${countryVal}</li>
+          </ul>
+        `;
+
+        // Remove older summary if exists, then append
+        const old = document.querySelector('.card .summary');
+        if (old) old.remove();
+        summary.className = 'summary';
+        document.querySelector('.card').appendChild(summary);
+
+        // Optionally reset password fields
+        inputs.password.value = '';
+        inputs.confirm.value = '';
+        updatePwdChips('');
+      }
+    });
+
+    // Reset button should clear banner & chip styles
+    byId('resetBtn').addEventListener('click', () => {
+      showBanner('ok', '');
+      byId('formMsg').className = 'msg';
+      document.querySelectorAll('.error').forEach(el => el.textContent = '');
+      document.querySelectorAll('.invalid').forEach(el => el.classList.remove('invalid'));
+      updatePwdChips('');
+      const existing = document.querySelector('.card .summary');
+      if (existing) existing.remove();
+    });
+
+    // Example of switch usage (for teaching): classify password strength
+    byId('password').addEventListener('blur', () => {
+      const val = byId('password').value;
+      let score = 0;
+      for (const key in rules) if (rules[key](val)) score++;
+      let label;
+      switch (true) {
+        case score >= 5: label = 'Very Strong'; break;
+        case score === 4: label = 'Strong'; break;
+        case score === 3: label = 'Medium'; break;
+        case score === 2: label = 'Weak'; break;
+        default: label = val ? 'Very Weak' : '';
+      }
+      const hint = byId('err-password');
+      if (label) hint.textContent = `Strength: ${label}`;
+    });
+  </script>
+</body>
+</html>
